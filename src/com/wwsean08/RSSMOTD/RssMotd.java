@@ -1,8 +1,8 @@
 package com.wwsean08.RSSMOTD;
 
 import java.util.ArrayList;
-
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -17,6 +17,7 @@ public class RssMotd extends JavaPlugin{
 	FileConfiguration config = null;
 	Server server = null;
 	PluginManager pm = null;
+        public static String structure = null;
 	private RssMotdParserRunnable runnable;
 	@Override
 	public void onDisable() {
@@ -33,6 +34,8 @@ public class RssMotd extends JavaPlugin{
 		pm.registerEvents(pl, this);
 		parseRSS();
 		server.getLogger().info("[NEWS] RSS reader running");
+                broadcastRSS();
+                structure = getConfig().getString("Structure");
 	}
 
 	@Override
@@ -40,17 +43,18 @@ public class RssMotd extends JavaPlugin{
 		if(commandLabel.equalsIgnoreCase("news")){
 			if(args.length == 0){
 				ArrayList<String> list = RssMotdParserRunnable.titles;
-				sender.sendMessage(config.getString("info"));
+				sender.sendMessage((ChatColor.translateAlternateColorCodes('&', (config.getString("info")))));
 				for(String s : list){
-					sender.sendMessage(config.getString("prefix")+ " " + s);
+					sender.sendMessage((ChatColor.translateAlternateColorCodes('&', (config.getString("prefix"))))+ " " + s);
 				}
 			}else if(args[0].equalsIgnoreCase("update")){
 				if(sender instanceof Player){
 					Player player = (Player)sender;
 					if(player.hasPermission("news.update")){
 						runnable.run();
+                                                sender.sendMessage("News updated");
 					}else{
-						player.sendMessage("you do not have permission to do that");
+						player.sendMessage("You do not have permission to do that");
 					}
 				}else if(sender instanceof ConsoleCommandSender){
 					runnable.run();
@@ -72,10 +76,33 @@ public class RssMotd extends JavaPlugin{
 	/**
 	 * parses the RSS feed and saves the results to be displayed to the user
 	 */
+
 	private void parseRSS(){
-		//roughly 1200 ticks per second
-		long updateInterval = config.getInt("RefreshTime")*1200;
-		runnable = new RssMotdParserRunnable(config.getString("Feed"), config.getInt("Posts"));
-		server.getScheduler().scheduleAsyncRepeatingTask(this, runnable, 0, updateInterval);
+		//roughly 1200 ticks per minute
+		int RefreshTime = config.getInt("RefreshTime")*1200;
+                runnable = new RssMotdParserRunnable(config.getString("Feed"), config.getInt("Posts"));
+                Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, runnable , 200, RefreshTime);
 	}
+	/**
+	 * broadcasts the RSS feed every x minutes 
+	 */
+  	private void broadcastRSS(){
+             if(config.getBoolean("Broadcast")){
+                int BroadcastTime = config.getInt("BroadcastTime")*1200;
+                Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
+                        public void run() {
+                            Bukkit.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes('&', (config.getString("info"))));
+                            ArrayList<String> list = RssMotdParserRunnable.titles;
+                                    for(String s : list){
+                                            Bukkit.getServer().broadcastMessage((ChatColor.translateAlternateColorCodes('&', (config.getString("prefix")))) + " " + s);
+                                    }
+                           
+                        }
+                }, 200, BroadcastTime);
+             }
+}
+   
+        
+
+
 }

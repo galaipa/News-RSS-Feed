@@ -1,6 +1,8 @@
 package com.wwsean08.RSSMOTD;
 
 import java.util.ArrayList;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -21,11 +23,13 @@ public class RssMotdPlayerListener implements Listener{
 		ArrayList<String> titles = RssMotdParserRunnable.titles;
 		if(!player.hasPermission("news.ignore")){
 			if(config.getBoolean("infoOnJoin")){
-				player.sendMessage(config.getString("info"));
+				player.sendMessage((ChatColor.translateAlternateColorCodes('&', (config.getString("info")))));
 			}
+                        if(config.getBoolean("newsOnJoin")){
 			for(String s : titles){
-				player.sendMessage(config.getString("prefix") + " " + s);
+				player.sendMessage((ChatColor.translateAlternateColorCodes('&', (config.getString("prefix"))))+ " " + s);
 			}
+                    }
 		}
 	}
 }

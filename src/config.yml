@@ -1,0 +1,10 @@
+Feed: http://wwsean08.com/?feed=rss2
+RefreshTime: 30
+Broadcast: true
+BroadcastTime: 31
+Posts: 5
+prefix: '&2[News]'
+info: '&2** All news can be found at http://www.wwsean08.com **'
+infoOnJoin: true
+newsOnJoin: true
+Structure: '&6[TITLE] &fDescription: [DESCRIPTION]'
